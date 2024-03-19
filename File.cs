@@ -34,13 +34,6 @@ namespace kyrsovapocsharp
                    $"Date Created: {CreationDate}\n" +
                    $"Time Created: {CreationTime}";
         }
-        public string Read()
-        {
-            return $"File Name: {FileName}\n" +
-                   $"Size: {Size} bytes\n" +
-                   $"Attributes: {Attributes}\n" +
-                   $"Date Created: {CreationDate}\n" +
-                   $"Time Created: {CreationTime.Read()}";
-        }
+        
     }
 }

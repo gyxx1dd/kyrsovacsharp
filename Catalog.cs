@@ -5,10 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Collections;
+
 
 namespace kyrsovapocsharp
 {
-    public class Catalog
+    public class Catalog : IEnumerable<File> //IEnumerable це інтерфейс, який допомагає створити ітератор для перебору елементів в колекції
     {
         private File[] files;
 
@@ -30,27 +32,42 @@ namespace kyrsovapocsharp
                         return;
                     }
                 }
+                throw new Exception("Немає вільного місця для нового файлу.");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                Console.WriteLine($"Помилка при додаванні файлу: {ex.Message}");
+                throw; 
             }
         }
 
 
         public void AddToFileInfo(string filePath)
         {
-            using (StreamWriter sw = new StreamWriter(filePath, true))
+            if (files == null)
             {
-                foreach (File file in files)
+                throw new InvalidOperationException("Масив файлів не був ініціалізований.");
+            }
+
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(filePath, true))
                 {
-                    if (file != null)
+                    foreach (File file in files)
                     {
-                        sw.WriteLine($"{file.CreationDate.Day} {file.CreationDate.Month} {file.CreationDate.Year} " +
-                                     $"{file.CreationTime.Hour} {file.CreationTime.Minute} {file.CreationTime.Second} " +
-                                     $"{file.FileName} {file.Size} {file.Attributes}");
+                        if (file != null)
+                        {
+                            sw.WriteLine($"{file.CreationDate.Day} {file.CreationDate.Month} {file.CreationDate.Year} " +
+                                         $"{file.CreationTime.Hour} {file.CreationTime.Minute} {file.CreationTime.Second} " +
+                                         $"{file.FileName} {file.Size} {file.Attributes}");
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Помилка при записі в файл: {ex.Message}");
+                throw; 
             }
         }
 
@@ -65,6 +82,22 @@ namespace kyrsovapocsharp
                 }
             }
             return null; // Якщо файл не знайдено
+        }
+        //повертає об'єкт, який можна використовувати для послідовного перебору елементів
+        public IEnumerator<File> GetEnumerator()
+        {
+            foreach (File file in files)
+            {
+                if (file != null)
+                {
+                    yield return file;
+                }
+            }
+        }
+        //просто повертає результат виклику методу GetEnumerator() для коректної роботи
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
